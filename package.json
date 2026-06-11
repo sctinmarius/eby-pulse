@@ -1,0 +1,56 @@
+{
+  "name": "eby-pulse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI marketing agent — understands your product, recommends and drafts social media posts, learns from feedback.",
+  "author": "Marius Stanciu",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node --env-file=.env dist/server.js",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "db:push:test": "DATABASE_URL=postgresql://ebypulse:ebypulse@localhost:5433/ebypulse_test prisma db push"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.82",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "ai": "^6.0.201",
+    "croner": "^10.0.1",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.8.5",
+    "fastify-type-provider-zod": "^6.1.0",
+    "grammy": "^1.43.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.9.3",
+    "eslint": "^10.4.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.4",
+    "prisma": "^7.8.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^4.1.8"
+  }
+}

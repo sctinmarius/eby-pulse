@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Business {
+  id              String   @id @default(cuid())
+  name            String
+  defaultLanguage String   @default("en")
+  timezone        String   @default("Europe/Bucharest")
+  telegramChatId  String?
+  apiKeyHash      String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  slug       String   @unique
+  settings   Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  knowledgeSections KnowledgeSection[]
+  recommendations   Recommendation[]
+  posts             Post[]
+  learnings         Learning[]
+  agentRuns         AgentRun[]
+
+  @@index([businessId])
+}
+
+enum KnowledgeKind {
+  PRODUCT
+  AUDIENCE
+  TONE
+  EXAMPLES
+}
+
+model KnowledgeSection {
+  id        String        @id @default(cuid())
+  productId String
+  kind      KnowledgeKind
+  title     String
+  content   String
+  sortOrder Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, kind])
+  @@index([productId])
+}
+
+enum ContentType {
+  EDUCATIONAL
+  FEATURE
+  SOCIAL_PROOF
+  OFFER
+}
+
+enum RecommendationStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+  USED
+}
+
+model Recommendation {
+  id          String               @id @default(cuid())
+  productId   String
+  topic       String
+  angle       String
+  contentType ContentType
+  rationale   String
+  status      RecommendationStatus @default(PROPOSED)
+  weekOf      DateTime             @db.Date
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  posts   Post[]
+
+  @@index([productId, weekOf])
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+}
+
+enum PostStatus {
+  PENDING_APPROVAL
+  APPROVED
+  SKIPPED
+  POSTED
+}
+
+model Post {
+  id               String     @id @default(cuid())
+  productId        String
+  recommendationId String?
+  platform         Platform
+  content          String
+  editedContent    String?
+  status           PostStatus @default(PENDING_APPROVAL)
+  scheduledFor     DateTime?
+  generationMeta   Json       @default("{}")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  product        Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  recommendation Recommendation?  @relation(fields: [recommendationId], references: [id], onDelete: SetNull)
+  signals        FeedbackSignal[]
+
+  @@index([productId, status])
+  @@index([productId, scheduledFor])
+}
+
+enum SignalType {
+  APPROVED
+  EDITED
+  SKIPPED
+  PERFORMANCE
+}
+
+model FeedbackSignal {
+  id        String     @id @default(cuid())
+  postId    String
+  type      SignalType
+  payload   Json       @default("{}")
+  createdAt DateTime   @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+enum LearningCategory {
+  TONE
+  TOPIC
+  FORMAT
+  TIMING
+}
+
+enum LearningStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Learning {
+  id              String           @id @default(cuid())
+  productId       String
+  category        LearningCategory
+  content         String
+  sourceSignalIds String[]         @default([])
+  status          LearningStatus   @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, status])
+}
+
+enum AgentTask {
+  GENERATE
+  RECOMMEND
+  REGENERATE
+  DISTILL
+}
+
+enum RunStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+model AgentRun {
+  id           String    @id @default(cuid())
+  productId    String
+  task         AgentTask
+  model        String
+  inputTokens  Int       @default(0)
+  outputTokens Int       @default(0)
+  costUsd      Decimal   @default(0) @db.Decimal(10, 6)
+  status       RunStatus @default(RUNNING)
+  error        String?
+  createdAt    DateTime  @default(now())
+  finishedAt   DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+}

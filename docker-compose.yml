@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ebypulse
+      POSTGRES_PASSWORD: ebypulse
+      POSTGRES_DB: ebypulse
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ebypulse']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    profiles: ['full']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://ebypulse:ebypulse@postgres:5432/ebypulse
+    env_file: .env
+    ports:
+      - '3333:3333'
+
+volumes:
+  pgdata:

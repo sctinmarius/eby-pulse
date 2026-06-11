@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ebypulse
+          POSTGRES_PASSWORD: ebypulse
+          POSTGRES_DB: ebypulse_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U ebypulse"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma:generate
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm db:push:test
+      - run: pnpm test
+      - name: Check migrations match schema
+        run: |
+          pnpm prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url postgresql://ebypulse:ebypulse@localhost:5433/ebypulse_test \
+            --exit-code
