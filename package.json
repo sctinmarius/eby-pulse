@@ -18,7 +18,13 @@
     "test:watch": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "db:push:test": "DATABASE_URL=postgresql://ebypulse:ebypulse@localhost:5433/ebypulse_test prisma db push"
+    "db:push:test": "DATABASE_URL=postgresql://ebypulse:ebypulse@localhost:5433/ebypulse_test prisma db push",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "dev:docker": "tsx watch src/server.ts",
+    "start:docker": "node dist/server.js",
+    "knowledge:import": "tsx --env-file=.env scripts/knowledge.ts import",
+    "knowledge:export": "tsx --env-file=.env scripts/knowledge.ts export",
+    "db:seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -39,6 +45,7 @@
     "fastify": "^5.8.5",
     "fastify-type-provider-zod": "^6.1.0",
     "grammy": "^1.43.0",
+    "prisma": "^7.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -47,7 +54,6 @@
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.4",
-    "prisma": "^7.8.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.0",

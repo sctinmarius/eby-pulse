@@ -1,19 +1,34 @@
-FROM node:24-slim AS build
-RUN corepack enable
+FROM node:24-alpine AS base
+
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+
+COPY package.json pnpm-lock.yaml tsconfig.json tsconfig.build.json prisma.config.ts ./
 COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm prisma:generate && pnpm build && pnpm prune --prod
 
-FROM node:24-slim
-RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+COPY . .
+# prisma.config.ts resolves DATABASE_URL eagerly; generate never connects,
+# so a placeholder is enough at build time (runtime env overrides it).
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
+RUN pnpm prisma:generate && pnpm build
+
+FROM node:24-alpine AS production
+
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/package.json ./
+
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+
+COPY --from=base /app/package.json /app/pnpm-lock.yaml ./
+COPY --from=base /app/node_modules ./node_modules
+RUN pnpm prune --prod
+
+COPY --from=base /app/prisma.config.ts ./
+COPY --from=base /app/prisma ./prisma
+COPY --from=base /app/dist ./dist
+
 EXPOSE 3333
-CMD ["node", "dist/server.js"]
+
+CMD ["sh", "-c", "pnpm prisma:migrate:deploy && pnpm start:docker"]

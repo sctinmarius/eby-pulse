@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17-alpine
+    pull_policy: missing
     environment:
       POSTGRES_USER: ebypulse
       POSTGRES_PASSWORD: ebypulse
@@ -16,17 +17,45 @@ services:
       timeout: 3s
       retries: 10
 
-  app:
-    build: .
-    profiles: ['full']
+  api:
+    image: eby-pulse-api:dev
+    pull_policy: missing
+    build:
+      context: .
+      target: base
+      dockerfile: Dockerfile
+    command: sh -c "pnpm prisma:migrate:deploy && pnpm dev:docker"
+    ports:
+      - '3333:3333'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    profiles:
+      - dev
+    env_file:
+      - .env
+      - .env.docker
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://ebypulse:ebypulse@postgres:5432/ebypulse
-    env_file: .env
+
+  api_prod:
+    image: eby-pulse-api:prod
+    pull_policy: missing
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile
     ports:
       - '3333:3333'
+    profiles:
+      - prod
+    env_file:
+      - .env
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:
