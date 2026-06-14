@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { API_KEY_PREFIX, generateApiKey, hashApiKey } from './api-key.js';
+import { API_KEY_PREFIX, generateApiKey, hashApiKey } from '../../src/lib/api-key.js';
 
 describe('api-key', () => {
   it('generates keys with the ebp_live_ prefix and enough entropy', () => {

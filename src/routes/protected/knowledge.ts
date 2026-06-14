@@ -1,7 +1,8 @@
+import { constants as HttpStatusCodes } from 'node:http2';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { getOwnedProduct } from '../tenants/service.js';
-import { deleteSection, listSections, upsertSection, upsertSections } from './service.js';
+import { deleteSection, listSections, upsertSection, upsertSections } from '../../services/knowledge.js';
+import { getOwnedProduct } from '../../services/products.js';
 
 const kindParam = z.enum(['product', 'audience', 'tone', 'examples']);
 const toKind = (value: z.infer<typeof kindParam>) =>
@@ -12,7 +13,7 @@ const sectionBody = z.object({
   content: z.string().min(1),
 });
 
-export const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
+const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/products/:productId/knowledge',
     { schema: { params: z.object({ productId: z.string() }) } },
@@ -42,7 +43,7 @@ export const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request, reply) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
       await deleteSection(product.id, toKind(request.params.kind));
-      return reply.code(204).send();
+      return reply.code(HttpStatusCodes.HTTP_STATUS_NO_CONTENT).send();
     },
   );
 
@@ -58,10 +59,16 @@ export const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
+
       return upsertSections(
         product.id,
-        request.body.sections.map((s) => ({ ...s, kind: toKind(s.kind) })),
+        request.body.sections.map((section) => ({
+          ...section,
+          kind: toKind(section.kind),
+        })),
       );
     },
   );
 };
+
+export default knowledgeRoutes;

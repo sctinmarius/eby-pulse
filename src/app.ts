@@ -1,52 +1,32 @@
-import Fastify, { type FastifyError, type FastifyReply, type FastifyRequest } from 'fastify';
-import {
-  serializerCompiler,
-  validatorCompiler,
-  hasZodFastifySchemaValidationErrors,
-  type ZodTypeProvider,
-} from 'fastify-type-provider-zod';
-import { ZodError } from 'zod';
-import { authenticate } from './lib/auth.js';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import autoLoad from '@fastify/autoload';
+import Fastify from 'fastify';
+import { type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { config } from './lib/config.js';
-import { knowledgeRoutes } from './modules/knowledge/routes.js';
-import { businessPublicRoutes, businessRoutes } from './modules/tenants/business-routes.js';
-import { productRoutes } from './modules/tenants/product-routes.js';
 
 export type App = ReturnType<typeof buildApp>;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 export function buildApp() {
   const app = Fastify({
-    logger: config.NODE_ENV !== 'test' && { level: 'info' },
+    logger: config.NODE_ENV !== 'test' && { level: process.env.LOG_LEVEL || 'info' },
   }).withTypeProvider<ZodTypeProvider>();
 
-  app.setValidatorCompiler(validatorCompiler);
-  app.setSerializerCompiler(serializerCompiler);
-
-  app.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
-    if (hasZodFastifySchemaValidationErrors(error)) {
-      return reply
-        .code(400)
-        .send({ error: 'Validation failed', details: error.validation });
-    }
-    if (error instanceof ZodError) {
-      return reply.code(400).send({ error: 'Validation failed', details: error.issues });
-    }
-    if (error.statusCode !== undefined && error.statusCode < 500) {
-      return reply.code(error.statusCode).send({ error: error.message });
-    }
-    request.log.error(error);
-    return reply.code(500).send({ error: 'Internal server error' });
+  app.register(autoLoad, {
+    dir: join(__dirname, 'plugins'),
+    encapsulate: false,
+    ignorePattern: /.*(?:test|spec)\.(?:js|cjs|mjs|ts)$/,
   });
 
-  app.get('/health', async () => ({ status: 'ok' }));
-
-  app.register(businessPublicRoutes);
-
-  app.register(async (authed) => {
-    authed.addHook('onRequest', authenticate);
-    await authed.register(businessRoutes);
-    await authed.register(productRoutes);
-    await authed.register(knowledgeRoutes);
+  app.register(autoLoad, {
+    dir: join(__dirname, 'routes'),
+    autoHooks: true,
+    cascadeHooks: true,
+    dirNameRoutePrefix: false,
+    ignorePattern: /.*(?:test|spec)\.(?:js|cjs|mjs|ts)$/,
   });
 
   return app;

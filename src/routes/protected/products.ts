@@ -2,8 +2,8 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
-import { getOwnedProduct } from './service.js';
-import { productSettingsSchema } from './settings.js';
+import { productSettingsSchema } from '../../services/product-settings.js';
+import { getOwnedProduct } from '../../services/products.js';
 
 const slugSchema = z
   .string()
@@ -11,7 +11,7 @@ const slugSchema = z
   .max(60)
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'lowercase letters, digits and dashes only');
 
-export const productRoutes: FastifyPluginAsyncZod = async (app) => {
+const productRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     '/products',
     {
@@ -71,9 +71,9 @@ export const productRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
       const settings = request.body.settings
-        ? // Partial update: merge over current settings, then re-validate the whole object.
-          productSettingsSchema.parse({ ...(product.settings as object), ...request.body.settings })
+        ? productSettingsSchema.parse({ ...(product.settings as object), ...request.body.settings })
         : undefined;
+
       return prisma.product.update({
         where: { id: product.id },
         data: {
@@ -84,3 +84,5 @@ export const productRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   );
 };
+
+export default productRoutes;

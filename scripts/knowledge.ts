@@ -6,7 +6,7 @@
  */
 import { parseArgs } from 'node:util';
 import { prisma } from '../src/lib/prisma.js';
-import { exportKnowledgeDir, importKnowledgeDir } from '../src/modules/knowledge/service.js';
+import { exportKnowledgeDir, importKnowledgeDir } from '../src/services/knowledge.js';
 
 async function main() {
   const { positionals, values } = parseArgs({

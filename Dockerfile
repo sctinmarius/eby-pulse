@@ -2,18 +2,20 @@ FROM node:24-alpine AS base
 
 WORKDIR /app
 
+ARG DATABASE_URL=postgresql://ebypulse:ebypulse@postgres:5432/ebypulse
+ENV DATABASE_URL=$DATABASE_URL
+
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 
+COPY . .
 COPY package.json pnpm-lock.yaml tsconfig.json tsconfig.build.json prisma.config.ts ./
 COPY prisma ./prisma
+
 RUN pnpm install --frozen-lockfile
+RUN pnpm prisma:generate
+RUN pnpm build
 
-COPY . .
-# prisma.config.ts resolves DATABASE_URL eagerly; generate never connects,
-# so a placeholder is enough at build time (runtime env overrides it).
-ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
-RUN pnpm prisma:generate && pnpm build
-
+# ---
 FROM node:24-alpine AS production
 
 WORKDIR /app
@@ -29,6 +31,6 @@ COPY --from=base /app/prisma.config.ts ./
 COPY --from=base /app/prisma ./prisma
 COPY --from=base /app/dist ./dist
 
-EXPOSE 3333
+EXPOSE 3030
 
-CMD ["sh", "-c", "pnpm prisma:migrate:deploy && pnpm start:docker"]
+CMD ["sh", "-c", "pnpm prisma:migrate && pnpm start:prod"]

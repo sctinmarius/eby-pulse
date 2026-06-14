@@ -1,13 +1,19 @@
 import { z } from 'zod';
 
+const portSchema = z.coerce.number().int().positive();
+
 const modelId = z
   .string()
-  .regex(/^[a-z0-9-]+:.+$/i, 'expected format providerId:modelId (e.g. anthropic:claude-sonnet-4-5)');
+  .regex(
+    /^[a-z0-9-]+:.+$/i,
+    'expected format providerId:modelId (e.g. anthropic:claude-sonnet-4-5)',
+  );
 
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-    PORT: z.coerce.number().int().positive().default(3333),
+    PORT: portSchema.optional(),
+    API_PORT: portSchema.optional(),
     DATABASE_URL: z.string().min(1),
     BOOTSTRAP_TOKEN: z.string().min(16),
     ANTHROPIC_API_KEY: z.string().optional(),
@@ -17,6 +23,10 @@ const envSchema = z
     MODEL_REGENERATE: modelId.default('anthropic:claude-sonnet-4-5'),
     MODEL_DISTILL: modelId.default('anthropic:claude-haiku-4-5'),
   })
+  .transform((env) => ({
+    ...env,
+    PORT: env.PORT ?? env.API_PORT ?? 3333,
+  }))
   .superRefine((env, ctx) => {
     // The agent cannot run without it, but tests use FakeLlmProvider.
     if (env.NODE_ENV !== 'test' && !env.ANTHROPIC_API_KEY) {

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildApp, type App } from '../app.js';
-import { prisma } from '../lib/prisma.js';
+import { buildApp, type App } from '../src/app.js';
+import { prisma } from '../src/lib/prisma.js';
 
 const BOOTSTRAP = 'test-bootstrap-token-0123456789';
 
@@ -64,7 +64,9 @@ describe('tenancy + knowledge API', () => {
       method: 'PATCH',
       url: `/products/${product.id}`,
       headers: a.auth,
-      payload: { settings: { contentMix: { educational: 90, feature: 30, socialProof: 20, offer: 10 } } },
+      payload: {
+        settings: { contentMix: { educational: 90, feature: 30, socialProof: 20, offer: 10 } },
+      },
     });
     expect(badPatch.statusCode).toBe(400);
 
@@ -76,7 +78,6 @@ describe('tenancy + knowledge API', () => {
     });
     expect(goodPatch.statusCode).toBe(200);
     expect(goodPatch.json().settings.postingCadence).toBe(3);
-    // merge keeps untouched keys
     expect(goodPatch.json().settings.language).toBe('ro-formal');
   });
 
@@ -120,8 +121,8 @@ describe('tenancy + knowledge API', () => {
       headers: a.auth,
     });
     const sections = list.json() as Array<{ kind: string; title: string }>;
-    expect(sections).toHaveLength(2); // upsert by kind, not duplicated
-    expect(sections.find((s) => s.kind === 'PRODUCT')?.title).toBe('What K is (v2)');
+    expect(sections).toHaveLength(2);
+    expect(sections.find((section) => section.kind === 'PRODUCT')?.title).toBe('What K is (v2)');
   });
 
   it('enforces tenant isolation: business B cannot see business A data', async () => {

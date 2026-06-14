@@ -15,12 +15,18 @@ export const contentMixSchema = z
   );
 
 export const productSettingsSchema = z.object({
-  platforms: z.array(z.enum(['FACEBOOK', 'INSTAGRAM'])).min(1).default(['FACEBOOK', 'INSTAGRAM']),
+  platforms: z
+    .array(z.enum(['FACEBOOK', 'INSTAGRAM']))
+    .min(1)
+    .default(['FACEBOOK', 'INSTAGRAM']),
   language: z.string().min(2).default('ro-formal'),
-  /** Posts per week. */
   postingCadence: z.number().int().min(1).max(14).default(5),
-  contentMix: contentMixSchema.default({ educational: 40, feature: 30, socialProof: 20, offer: 10 }),
-  /** Optional per-task model overrides (providerId:modelId). */
+  contentMix: contentMixSchema.default({
+    educational: 40,
+    feature: 30,
+    socialProof: 20,
+    offer: 10,
+  }),
   models: z
     .object({
       generate: modelId.optional(),

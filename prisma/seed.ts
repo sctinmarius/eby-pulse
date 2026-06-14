@@ -1,7 +1,7 @@
 import { generateApiKey } from '../src/lib/api-key.js';
 import { prisma } from '../src/lib/prisma.js';
-import { importKnowledgeDir } from '../src/modules/knowledge/service.js';
-import { productSettingsSchema } from '../src/modules/tenants/settings.js';
+import { importKnowledgeDir } from '../src/services/knowledge.js';
+import { productSettingsSchema } from '../src/services/product-settings.js';
 
 async function main() {
   let business = await prisma.business.findFirst({ where: { name: 'Doctor Estimator' } });

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { FILE_TO_KIND, KIND_TO_FILE, titleFromMarkdown } from './markdown.js';
+import {
+  FILE_TO_KIND,
+  KIND_TO_FILE,
+  titleFromMarkdown,
+} from '../../src/services/knowledge-markdown.js';
 
 describe('knowledge markdown helpers', () => {
   it('maps kinds to files and back symmetrically', () => {
