@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import autoLoad from '@fastify/autoload';
 import Fastify from 'fastify';
 import { type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { config } from './lib/config.js';
+import { config } from './libs/config.js';
 
 export type App = ReturnType<typeof buildApp>;
 

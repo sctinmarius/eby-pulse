@@ -1,7 +1,12 @@
 import { constants as HttpStatusCodes } from 'node:http2';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { deleteSection, listSections, upsertSection, upsertSections } from '../../services/knowledge.js';
+import {
+  deleteSection,
+  listSections,
+  upsertSection,
+  upsertSections,
+} from '../../services/knowledge.js';
 import { getOwnedProduct } from '../../services/products.js';
 
 const kindParam = z.enum(['product', 'audience', 'tone', 'examples']);
@@ -19,6 +24,7 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     { schema: { params: z.object({ productId: z.string() }) } },
     async (request) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
+
       return listSections(product.id);
     },
   );
@@ -33,6 +39,7 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
+
       return upsertSection(product.id, { kind: toKind(request.params.kind), ...request.body });
     },
   );
@@ -43,6 +50,7 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request, reply) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
       await deleteSection(product.id, toKind(request.params.kind));
+
       return reply.code(HttpStatusCodes.HTTP_STATUS_NO_CONTENT).send();
     },
   );
@@ -53,7 +61,10 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: {
         params: z.object({ productId: z.string() }),
         body: z.object({
-          sections: z.array(sectionBody.extend({ kind: kindParam })).min(1).max(4),
+          sections: z
+            .array(sectionBody.extend({ kind: kindParam }))
+            .min(1)
+            .max(4),
         }),
       },
     },

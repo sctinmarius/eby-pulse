@@ -1,5 +1,5 @@
 import { buildApp } from './app.js';
-import { config } from './lib/config.js';
+import { config } from './libs/config.js';
 
 const app = buildApp();
 

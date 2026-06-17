@@ -22,7 +22,7 @@ export default tseslint.config(
         {
           patterns: [
             { group: ['fastify*', '@prisma/*', 'grammy*', 'croner'], message: 'src/agent must stay framework-free (spec §4).' },
-            { group: ['../modules/*', '../lib/prisma*', '../jobs/*'], message: 'src/agent must not depend on app modules (spec §4).' },
+            { group: ['../modules/*', '../libs/prisma*', '../jobs/*'], message: 'src/agent must not depend on app modules (spec §4).' },
           ],
         },
       ],

@@ -1,8 +1,8 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { generateApiKey } from '../lib/api-key.js';
-import { config } from '../lib/config.js';
-import { prisma } from '../lib/prisma.js';
+import { generateApiKey } from '../libs/api-key.js';
+import { config } from '../libs/config.js';
+import { prisma } from '../libs/prisma.js';
 import { sanitizeBusiness } from '../services/businesses.js';
 
 const businessRoutes: FastifyPluginAsyncZod = async (app) => {

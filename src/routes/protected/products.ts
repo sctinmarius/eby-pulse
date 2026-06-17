@@ -1,8 +1,8 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { Prisma } from '../../generated/prisma/client.js';
-import { prisma } from '../../lib/prisma.js';
-import { productSettingsSchema } from '../../services/product-settings.js';
+import { prisma } from '../../libs/prisma.js';
+import { productSettingsSchema } from '../../schema/product-settings.js';
 import { getOwnedProduct } from '../../services/products.js';
 
 const slugSchema = z

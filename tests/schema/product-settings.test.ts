@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { productSettingsSchema } from '../../src/services/product-settings.js';
+import { productSettingsSchema } from '../../src/schema/product-settings.js';
 
 describe('productSettingsSchema', () => {
   it('fills defaults for an empty object', () => {

@@ -25,10 +25,9 @@ const envSchema = z
   })
   .transform((env) => ({
     ...env,
-    PORT: env.PORT ?? env.API_PORT ?? 3333,
+    PORT: env.PORT ?? env.API_PORT ?? 3030,
   }))
   .superRefine((env, ctx) => {
-    // The agent cannot run without it, but tests use FakeLlmProvider.
     if (env.NODE_ENV !== 'test' && !env.ANTHROPIC_API_KEY) {
       ctx.addIssue({
         code: 'custom',

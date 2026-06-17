@@ -1,6 +1,6 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { prisma } from '../../lib/prisma.js';
+import { prisma } from '../../libs/prisma.js';
 import { sanitizeBusiness } from '../../services/businesses.js';
 
 const protectedBusinessRoutes: FastifyPluginAsyncZod = async (app) => {

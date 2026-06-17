@@ -5,8 +5,8 @@
  *   pnpm knowledge:export <dir> --product <slug>
  */
 import { parseArgs } from 'node:util';
-import { prisma } from '../src/lib/prisma.js';
 import { exportKnowledgeDir, importKnowledgeDir } from '../src/services/knowledge.js';
+import { prisma } from '../src/libs/prisma.js';
 
 async function main() {
   const { positionals, values } = parseArgs({
