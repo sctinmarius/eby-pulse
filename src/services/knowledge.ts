@@ -14,9 +14,7 @@ export const FILE_TO_KIND: Record<string, KnowledgeKind> = Object.fromEntries(
   Object.entries(KIND_TO_FILE).map(([kind, file]) => [file, kind as KnowledgeKind]),
 );
 
-export const KNOWLEDGE_KINDS = Object.keys(KIND_TO_FILE) as KnowledgeKind[];
-
-export interface KnowledgeSectionInput {
+interface KnowledgeSectionInput {
   kind: KnowledgeKind;
   title?: string;
   content: string;
@@ -65,7 +63,10 @@ async function readKnowledgeDir(
 
   for (const file of files) {
     const kind = FILE_TO_KIND[file];
-    if (!kind) continue;
+    if (!kind) {
+      continue;
+    }
+
     sections.push({ kind, content: await storage.readText(join(dir, file)) });
   }
 
@@ -78,6 +79,7 @@ export async function importKnowledgeDir(
   storage: TextFileStorage = fileSystemStorage,
 ) {
   const sections = await readKnowledgeDir(dir, storage);
+
   return upsertSections(productId, sections);
 }
 

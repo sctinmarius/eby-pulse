@@ -6,6 +6,7 @@ export const BOOTSTRAP = 'test-bootstrap-token-0123456789';
 export async function createTestApp(): Promise<App> {
   const app = buildApp();
   await app.ready();
+
   return app;
 }
 

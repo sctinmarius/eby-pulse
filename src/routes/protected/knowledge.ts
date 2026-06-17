@@ -8,6 +8,7 @@ import {
   upsertSections,
 } from '../../services/knowledge.js';
 import { getOwnedProduct } from '../../services/products.js';
+import { bearerSecurity } from '../../common/constant.js';
 
 const kindParam = z.enum(['product', 'audience', 'tone', 'examples']);
 const toKind = (value: z.infer<typeof kindParam>) =>
@@ -21,9 +22,14 @@ const sectionBody = z.object({
 const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/products/:productId/knowledge',
-    { schema: { params: z.object({ productId: z.string() }) } },
-    async (request) => {
-      const product = await getOwnedProduct(request.params.productId, request.business.id);
+    {
+      schema: {
+        security: bearerSecurity,
+        params: z.object({ productId: z.string() }),
+      },
+    },
+    async ({ params, business }) => {
+      const product = await getOwnedProduct(params.productId, business.id);
 
       return listSections(product.id);
     },
@@ -33,23 +39,29 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     '/products/:productId/knowledge/:kind',
     {
       schema: {
+        security: bearerSecurity,
         params: z.object({ productId: z.string(), kind: kindParam }),
         body: sectionBody,
       },
     },
-    async (request) => {
-      const product = await getOwnedProduct(request.params.productId, request.business.id);
+    async ({ params, business, body }) => {
+      const product = await getOwnedProduct(params.productId, business.id);
 
-      return upsertSection(product.id, { kind: toKind(request.params.kind), ...request.body });
+      return upsertSection(product.id, { kind: toKind(params.kind), ...body });
     },
   );
 
   app.delete(
     '/products/:productId/knowledge/:kind',
-    { schema: { params: z.object({ productId: z.string(), kind: kindParam }) } },
-    async (request, reply) => {
-      const product = await getOwnedProduct(request.params.productId, request.business.id);
-      await deleteSection(product.id, toKind(request.params.kind));
+    {
+      schema: {
+        security: bearerSecurity,
+        params: z.object({ productId: z.string(), kind: kindParam }),
+      },
+    },
+    async ({ params, business }, reply) => {
+      const product = await getOwnedProduct(params.productId, business.id);
+      await deleteSection(product.id, toKind(params.kind));
 
       return reply.code(HttpStatusCodes.HTTP_STATUS_NO_CONTENT).send();
     },
@@ -59,6 +71,7 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
     '/products/:productId/knowledge/import',
     {
       schema: {
+        security: bearerSecurity,
         params: z.object({ productId: z.string() }),
         body: z.object({
           sections: z
@@ -68,12 +81,12 @@ const knowledgeRoutes: FastifyPluginAsyncZod = async (app) => {
         }),
       },
     },
-    async (request) => {
-      const product = await getOwnedProduct(request.params.productId, request.business.id);
+    async ({ params, business, body }) => {
+      const product = await getOwnedProduct(params.productId, business.id);
 
       return upsertSections(
         product.id,
-        request.body.sections.map((section) => ({
+        body.sections.map((section) => ({
           ...section,
           kind: toKind(section.kind),
         })),

@@ -20,6 +20,7 @@ pnpm install
 pnpm prisma:migrate           # apply migrations
 pnpm db:seed                  # seed Doctor Estimator tenant (prints API key once)
 pnpm dev                      # http://localhost:3333/health
+# Swagger UI is available locally only at http://localhost:3333/docs
 ```
 
 Full stack in Docker (mirrors doctor-estimator-be conventions):
