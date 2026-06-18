@@ -14,7 +14,7 @@ Fastify 5 · Prisma + PostgreSQL · Vercel AI SDK (Anthropic) · grammY (Telegra
 ## Development
 
 ```bash
-cp .env.example .env          # fill BOOTSTRAP_TOKEN + ANTHROPIC_API_KEY
+cp .env.example .env          # fill BOOTSTRAP_TOKEN + the provider API key(s) required by MODEL_*
 docker compose up -d postgres # postgres on localhost:5433
 pnpm install
 pnpm prisma:migrate           # apply migrations

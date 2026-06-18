@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { App } from '../../../../src/app.js';
+import type { App } from '../../../../../../src/app.js';
 import {
   closeTestApp,
   createBusiness,
   createProduct,
   createTestApp,
   resetDatabase,
-} from '../../support.js';
+} from '../../../../support.js';
 
 describe('protected /products/:productId/knowledge routes', () => {
   let app: App;

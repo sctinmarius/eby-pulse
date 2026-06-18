@@ -6,7 +6,7 @@ describe('productSettingsSchema', () => {
     const settings = productSettingsSchema.parse({});
     expect(settings.platforms).toEqual(['FACEBOOK', 'INSTAGRAM']);
     expect(settings.language).toBe('ro-formal');
-    expect(settings.postingCadence).toBe(5);
+    expect(settings.postsPerWeek).toBe(5);
     expect(settings.contentMix).toEqual({
       educational: 40,
       feature: 30,

@@ -73,7 +73,7 @@ export async function createProduct(
       slug: string;
       settings: {
         language: string;
-        postingCadence: number;
+        postsPerWeek: number;
         contentMix: Record<string, number>;
       };
     },

@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { App } from '../../../../src/app.js';
+import type { App } from '../../../../../src/app.js';
 import {
   closeTestApp,
   createBusiness,
   createProduct,
   createTestApp,
   resetDatabase,
-} from '../../support.js';
+} from '../../../support.js';
 
 describe('protected /products routes', () => {
   let app: App;
@@ -37,7 +37,7 @@ describe('protected /products routes', () => {
 
     expect(created.response.statusCode).toBe(201);
     expect(created.body.settings.language).toBe('ro-formal');
-    expect(created.body.settings.postingCadence).toBe(5);
+    expect(created.body.settings.postsPerWeek).toBe(5);
     expect(created.body.settings.contentMix).toEqual({
       educational: 40,
       feature: 30,
@@ -74,13 +74,13 @@ describe('protected /products routes', () => {
       headers: { authorization: `Bearer ${owner.body.apiKey}` },
       payload: {
         name: 'Doctor Estimator Pro',
-        settings: { postingCadence: 3 },
+        settings: { postsPerWeek: 3 },
       },
     });
 
     expect(patched.statusCode).toBe(200);
     expect(patched.json().name).toBe('Doctor Estimator Pro');
-    expect(patched.json().settings.postingCadence).toBe(3);
+    expect(patched.json().settings.postsPerWeek).toBe(3);
     expect(patched.json().settings.language).toBe('ro-formal');
     expect(patched.json().settings.contentMix).toEqual({
       educational: 40,
@@ -120,6 +120,21 @@ describe('protected /products routes', () => {
     });
 
     expect(invalidContentMix.statusCode).toBe(400);
+
+    const clientModelsOverride = await app.inject({
+      method: 'POST',
+      url: '/products',
+      headers: auth,
+      payload: {
+        name: 'No Model Override',
+        slug: 'no-model-override',
+        settings: {
+          models: { generate: 'openai:gpt-5' },
+        },
+      },
+    });
+
+    expect(clientModelsOverride.statusCode).toBe(400);
 
     const duplicateSameBusiness = await app.inject({
       method: 'POST',

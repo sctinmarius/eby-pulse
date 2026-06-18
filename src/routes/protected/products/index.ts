@@ -1,11 +1,15 @@
+import { constants as HttpStatusCodes } from 'node:http2';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { constants as HttpStatusCodes } from 'node:http2';
-import { Prisma } from '../../generated/prisma/client.js';
-import { prisma } from '../../libs/prisma.js';
-import { productSettingsSchema } from '../../schema/product-settings.js';
-import { getOwnedProduct } from '../../services/products.js';
-import { bearerSecurity } from '../../common/constant.js';
+import { Prisma } from '../../../generated/prisma/client.js';
+import { prisma } from '../../../libs/prisma.js';
+import {
+  productSettingsSchema,
+  writableProductSettingsPatchSchema,
+  writableProductSettingsSchema,
+} from '../../../schema/product-settings.js';
+import { getOwnedProduct } from '../../../services/products.js';
+import { bearerSecurity } from '../../../common/constant.js';
 
 const slugSchema = z
   .string()
@@ -22,12 +26,12 @@ const productRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           name: z.string().min(2).max(150),
           slug: slugSchema,
-          settings: productSettingsSchema.optional(),
+          settings: writableProductSettingsSchema.optional(),
         }),
       },
     },
     async (request, reply) => {
-      const settings = productSettingsSchema.parse(request.body.settings ?? {});
+      const settings = writableProductSettingsSchema.parse(request.body.settings ?? {});
       try {
         const product = await prisma.product.create({
           data: {
@@ -75,14 +79,17 @@ const productRoutes: FastifyPluginAsyncZod = async (app) => {
         params: z.object({ productId: z.string() }),
         body: z.object({
           name: z.string().min(2).max(150).optional(),
-          settings: z.record(z.string(), z.unknown()).optional(),
+          settings: writableProductSettingsPatchSchema.optional(),
         }),
       },
     },
     async (request) => {
       const product = await getOwnedProduct(request.params.productId, request.business.id);
-      const settings = request.body.settings
-        ? productSettingsSchema.parse({ ...(product.settings as object), ...request.body.settings })
+      const settingsUpdate = request.body.settings
+        ? writableProductSettingsPatchSchema.parse(request.body.settings)
+        : undefined;
+      const settings = settingsUpdate
+        ? productSettingsSchema.parse({ ...(product.settings as object), ...settingsUpdate })
         : undefined;
 
       return prisma.product.update({

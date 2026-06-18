@@ -6,9 +6,9 @@ import {
   listSections,
   upsertSection,
   upsertSections,
-} from '../../services/knowledge.js';
-import { getOwnedProduct } from '../../services/products.js';
-import { bearerSecurity } from '../../common/constant.js';
+} from '../../../../services/knowledge.js';
+import { getOwnedProduct } from '../../../../services/products.js';
+import { bearerSecurity } from '../../../../common/constant.js';
 
 const kindParam = z.enum(['product', 'audience', 'tone', 'examples']);
 const toKind = (value: z.infer<typeof kindParam>) =>
