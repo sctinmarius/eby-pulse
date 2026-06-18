@@ -12,7 +12,12 @@ programul, procedurile și veniturile.
 - **Valoarea reală pe oră** — aplicația calculează venitul pe oră reală lucrată,
   nu doar pe oră estimată; medicul își vede negru pe alb valoarea timpului său.
 - **Timp estimat vs. timp real pe procedură** — cu cronometru live; medicul află
-  dacă subestimează sistematic durata procedurilor (și implicit prețul lor).
+  dacă subestimează sistematic durata procedurilor (și implicit prețul lor). Orele
+  reale se pot adauga și ulterior (dacă medicul nu vrea sau nu poate să folosească
+  cronometrul live). Dacă medicul a terminat procedura de făcut, iși poate introduce
+  manual cât a durat acea operațiune sau procedură, astfel se poate vedea
+  o comparație între orele estimate (atunci când s-a adaugat programarea în calendar și după
+  ce s-a terminat de efectuat procedura).
 - **Import de programări dintr-o fotografie** — medicul fotografiază orarul primit
   de la clinică, iar AI-ul extrage programările; medicul verifică și salvează.
   (Întotdeauna cu pas de verificare — nu promitem acuratețe oarbă.)
@@ -26,9 +31,12 @@ programul, procedurile și veniturile.
 
 **Acces gratuit 6 luni** (early access) — înscriere pe doctorestimator.ro.
 Acesta este cârligul principal al tuturor materialelor de marketing.
+Această oferta este valabilă pentru 15-20 medici (nu as vrea ca asta să fie mentionat
+în postările pe social media). După ce produsul este folosit de 15-20 medici, va urma
+un focus pe feedback-ul doctorilor și o modificare de ofertă (e.g.: prima lună gratuita)
 
 ## Poziționare
 
 Nu este software de management de clinică — este instrumentul personal al medicului
-colaborator. Clinica are sistemul ei; medicul care lucrează în 2–3 clinici nu are
-nimic al lui. Doctor Estimator este "contabilul și secretara" personală a medicului.
+colaborator. Clinica are sistemul ei; medicul care lucrează în una sau mai multe clinici  
+nu are nimic al lui. Doctor Estimator este "contabilul și secretara" personală a medicului.

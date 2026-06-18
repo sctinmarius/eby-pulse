@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { authenticate } from '../../lib/auth.js';
+import { authenticate } from '../../libs/auth.js';
 
 const protectedRoutesHooks: FastifyPluginAsync = async (app) => {
   app.addHook('onRequest', authenticate);

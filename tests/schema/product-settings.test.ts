@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { productSettingsSchema } from '../../src/services/product-settings.js';
+import { productSettingsSchema } from '../../src/schema/product-settings.js';
 
 describe('productSettingsSchema', () => {
   it('fills defaults for an empty object', () => {
     const settings = productSettingsSchema.parse({});
     expect(settings.platforms).toEqual(['FACEBOOK', 'INSTAGRAM']);
     expect(settings.language).toBe('ro-formal');
-    expect(settings.postingCadence).toBe(5);
+    expect(settings.postsPerWeek).toBe(5);
     expect(settings.contentMix).toEqual({
       educational: 40,
       feature: 30,

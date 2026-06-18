@@ -10,24 +10,26 @@ datasource db {
 model Business {
   id              String   @id @default(cuid())
   name            String
-  defaultLanguage String   @default("en")
+  defaultLanguage String   @default("en") @map("default_language")
   timezone        String   @default("Europe/Bucharest")
-  telegramChatId  String?
-  apiKeyHash      String   @unique
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  telegramChatId  String?  @map("telegram_chat_id")
+  apiKeyHash      String   @unique @map("api_key_hash")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   products Product[]
+
+  @@map("businesses")
 }
 
 model Product {
   id         String   @id @default(cuid())
-  businessId String
+  businessId String   @map("business_id")
   name       String
   slug       String   @unique
   settings   Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
   knowledgeSections KnowledgeSection[]
@@ -37,6 +39,7 @@ model Product {
   agentRuns         AgentRun[]
 
   @@index([businessId])
+  @@map("products")
 }
 
 enum KnowledgeKind {
@@ -48,18 +51,19 @@ enum KnowledgeKind {
 
 model KnowledgeSection {
   id        String        @id @default(cuid())
-  productId String
+  productId String        @map("product_id")
   kind      KnowledgeKind
   title     String
   content   String
-  sortOrder Int           @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  sortOrder Int           @default(0) @map("sort_order")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, kind])
   @@index([productId])
+  @@map("knowledge_sections")
 }
 
 enum ContentType {
@@ -78,20 +82,21 @@ enum RecommendationStatus {
 
 model Recommendation {
   id          String               @id @default(cuid())
-  productId   String
+  productId   String               @map("product_id")
   topic       String
   angle       String
-  contentType ContentType
+  contentType ContentType          @map("content_type")
   rationale   String
   status      RecommendationStatus @default(PROPOSED)
-  weekOf      DateTime             @db.Date
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  weekOf      DateTime             @map("week_of") @db.Date
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   posts   Post[]
 
   @@index([productId, weekOf])
+  @@map("recommendations")
 }
 
 enum Platform {
@@ -108,16 +113,16 @@ enum PostStatus {
 
 model Post {
   id               String     @id @default(cuid())
-  productId        String
-  recommendationId String?
+  productId        String     @map("product_id")
+  recommendationId String?    @map("recommendation_id")
   platform         Platform
   content          String
-  editedContent    String?
+  editedContent    String?    @map("edited_content")
   status           PostStatus @default(PENDING_APPROVAL)
-  scheduledFor     DateTime?
-  generationMeta   Json       @default("{}")
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  scheduledFor     DateTime?  @map("scheduled_for")
+  generationMeta   Json       @default("{}") @map("generation_meta")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
 
   product        Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   recommendation Recommendation?  @relation(fields: [recommendationId], references: [id], onDelete: SetNull)
@@ -125,6 +130,7 @@ model Post {
 
   @@index([productId, status])
   @@index([productId, scheduledFor])
+  @@map("posts")
 }
 
 enum SignalType {
@@ -136,14 +142,15 @@ enum SignalType {
 
 model FeedbackSignal {
   id        String     @id @default(cuid())
-  postId    String
+  postId    String     @map("post_id")
   type      SignalType
   payload   Json       @default("{}")
-  createdAt DateTime   @default(now())
+  createdAt DateTime   @default(now()) @map("created_at")
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+  @@map("feedback_signals")
 }
 
 enum LearningCategory {
@@ -160,17 +167,18 @@ enum LearningStatus {
 
 model Learning {
   id              String           @id @default(cuid())
-  productId       String
+  productId       String           @map("product_id")
   category        LearningCategory
   content         String
-  sourceSignalIds String[]         @default([])
+  sourceSignalIds String[]         @default([]) @map("source_signal_ids")
   status          LearningStatus   @default(ACTIVE)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, status])
+  @@map("learnings")
 }
 
 enum AgentTask {
@@ -188,18 +196,19 @@ enum RunStatus {
 
 model AgentRun {
   id           String    @id @default(cuid())
-  productId    String
+  productId    String    @map("product_id")
   task         AgentTask
   model        String
-  inputTokens  Int       @default(0)
-  outputTokens Int       @default(0)
-  costUsd      Decimal   @default(0) @db.Decimal(10, 6)
+  inputTokens  Int       @default(0) @map("input_tokens")
+  outputTokens Int       @default(0) @map("output_tokens")
+  costUsd      Decimal   @default(0) @map("cost_usd") @db.Decimal(10, 6)
   status       RunStatus @default(RUNNING)
   error        String?
-  createdAt    DateTime  @default(now())
-  finishedAt   DateTime?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  finishedAt   DateTime? @map("finished_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, createdAt])
+  @@map("agent_runs")
 }

@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  FILE_TO_KIND,
-  KIND_TO_FILE,
-  titleFromMarkdown,
-} from '../../src/services/knowledge-markdown.js';
+import { FILE_TO_KIND, KIND_TO_FILE, titleFromMarkdown } from '../../src/services/knowledge.js';
 
-describe('knowledge markdown helpers', () => {
+describe('knowledge helpers', () => {
   it('maps kinds to files and back symmetrically', () => {
     for (const [kind, file] of Object.entries(KIND_TO_FILE)) {
       expect(FILE_TO_KIND[file]).toBe(kind);

@@ -8,5 +8,6 @@ export function hashApiKey(key: string): string {
 
 export function generateApiKey(): { key: string; hash: string } {
   const key = `${API_KEY_PREFIX}${randomBytes(32).toString('base64url')}`;
+
   return { key, hash: hashApiKey(key) };
 }

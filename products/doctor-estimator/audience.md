@@ -19,7 +19,7 @@ instituții și nu dețin propriul sistem informatic.
    clinică (procente de colaborare diferite!) sunt obositoare și nesigure.
 2. **Nu își cunosc valoarea reală pe oră** — nu pot negocia informat cu clinicile.
 3. **Program fragmentat** — 2–3 calendare diferite, risc de suprapuneri.
-4. **Timpul procedurilor e subestimat** — consultația "de 30 de minute" durează 50,
+4. **Timpul procedurilor sau progrămarilor e subestimat** — consultația "de 30 de minute" durează 50,
    iar prețul nu reflectă asta.
 
 ## Particularități de care ținem cont

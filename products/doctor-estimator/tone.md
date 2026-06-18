@@ -15,5 +15,5 @@
    întotdeauna cu pasul de verificare: „dumneavoastră verificați înainte de salvare".
 6. **Încredere înainte de tehnologie.** Unde e relevant, menționăm siguranța datelor.
 7. **CTA standard:** înscrierea pentru cele 6 luni gratuite pe doctorestimator.ro.
-8. **Lungime:** postări Facebook 60–120 de cuvinte; Instagram mai scurt, cu primele
+8. **Lungime:** postări Facebook 50–100 de cuvinte; Instagram mai scurt, cu primele
    2 rânduri purtătoare de mesaj. Emoji-uri cu moderație (1–3, profesionale).
