@@ -1,41 +1,14 @@
 import { z } from 'zod';
+import { modelIdSchema } from '../schema/shared.js';
+import { providerApiKeyEnvName, providerIdFromModelId } from './config/providers.js';
+import { hasPriceFor } from './model-pricing.js';
+import { MODEL_ENV_VARS, TASK_MODEL_DEFAULTS, type ModelEnvVar } from './task-models.js';
 
 const portSchema = z.coerce.number().int().positive();
 const apiKeySchema = z.string().min(1).optional();
-const modelEnvKeys = [
-  'MODEL_GENERATE',
-  'MODEL_RECOMMEND',
-  'MODEL_REGENERATE',
-  'MODEL_DISTILL',
-] as const;
 
-const modelId = z
-  .string()
-  .regex(
-    /^[a-z0-9-]+:.+$/i,
-    'expected format providerId:modelId (e.g. anthropic:claude-sonnet-4-5)',
-  );
-
-const providerApiKeyEnvNames: Record<string, string> = {
-  anthropic: 'ANTHROPIC_API_KEY',
-  openai: 'OPENAI_API_KEY',
-  google: 'GOOGLE_API_KEY',
-  gemini: 'GOOGLE_API_KEY',
-};
-
-function providerIdFromModelId(value: string) {
-  return value.split(':', 1)[0] ?? '';
-}
-
-function providerApiKeyEnvName(providerId: string) {
-  return (
-    providerApiKeyEnvNames[providerId] ??
-    `${providerId.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}_API_KEY`
-  );
-}
-
-function configuredProviderIds(env: Record<(typeof modelEnvKeys)[number], string>) {
-  return new Set(modelEnvKeys.map((key) => providerIdFromModelId(env[key])));
+function configuredProviderIds(env: Record<ModelEnvVar, string>) {
+  return new Set(MODEL_ENV_VARS.map((envVar) => providerIdFromModelId(env[envVar])));
 }
 
 const envSchema = z
@@ -49,10 +22,10 @@ const envSchema = z
     OPENAI_API_KEY: apiKeySchema,
     GOOGLE_API_KEY: apiKeySchema,
     TELEGRAM_BOT_TOKEN: z.string().optional(),
-    MODEL_GENERATE: modelId.default('anthropic:claude-sonnet-4-5'),
-    MODEL_RECOMMEND: modelId.default('anthropic:claude-sonnet-4-5'),
-    MODEL_REGENERATE: modelId.default('anthropic:claude-sonnet-4-5'),
-    MODEL_DISTILL: modelId.default('anthropic:claude-haiku-4-5'),
+    MODEL_GENERATE: modelIdSchema.default(TASK_MODEL_DEFAULTS.GENERATE.defaultModel),
+    MODEL_RECOMMEND: modelIdSchema.default(TASK_MODEL_DEFAULTS.RECOMMEND.defaultModel),
+    MODEL_REGENERATE: modelIdSchema.default(TASK_MODEL_DEFAULTS.REGENERATE.defaultModel),
+    MODEL_DISTILL: modelIdSchema.default(TASK_MODEL_DEFAULTS.DISTILL.defaultModel),
   })
   .transform((env) => ({
     ...env,
@@ -67,6 +40,16 @@ const envSchema = z
     ),
   }))
   .superRefine((env, ctx) => {
+    for (const envVar of MODEL_ENV_VARS) {
+      if (!hasPriceFor(env[envVar])) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [envVar],
+          message: `model "${env[envVar]}" has no price entry in src/libs/model-pricing.ts`,
+        });
+      }
+    }
+
     if (env.NODE_ENV === 'test') {
       return;
     }
