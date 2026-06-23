@@ -60,6 +60,29 @@ describe('GET/PATCH /businesses/me', () => {
     });
   });
 
+  it('sets and clears the monthly spend cap', async () => {
+    const owner = await createBusiness(app, { name: 'Budget Clinic' });
+    const auth = { authorization: `Bearer ${owner.body.apiKey}` };
+
+    const capped = await app.inject({
+      method: 'PATCH',
+      url: '/businesses/me',
+      headers: auth,
+      payload: { monthlySpendCapUsd: 50 },
+    });
+    expect(capped.statusCode).toBe(200);
+    expect(Number(capped.json().monthlySpendCapUsd)).toBe(50);
+
+    const cleared = await app.inject({
+      method: 'PATCH',
+      url: '/businesses/me',
+      headers: auth,
+      payload: { monthlySpendCapUsd: null },
+    });
+    expect(cleared.statusCode).toBe(200);
+    expect(cleared.json().monthlySpendCapUsd).toBeNull();
+  });
+
   it('rejects requests without a valid API key', async () => {
     const missing = await app.inject({
       method: 'GET',

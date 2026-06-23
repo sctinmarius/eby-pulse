@@ -1,13 +1,13 @@
 import { z } from 'zod';
-
-const modelId = z.string().regex(/^[a-z0-9-]+:.+$/i, 'expected format providerId:modelId');
+import { platformEnum } from '../agent/types.js';
+import { modelIdSchema } from './shared.js';
 
 const modelOverridesSchema = z
   .object({
-    generate: modelId.optional(),
-    recommend: modelId.optional(),
-    regenerate: modelId.optional(),
-    distill: modelId.optional(),
+    generate: modelIdSchema.optional(),
+    recommend: modelIdSchema.optional(),
+    regenerate: modelIdSchema.optional(),
+    distill: modelIdSchema.optional(),
   })
   .optional();
 
@@ -24,10 +24,7 @@ export const contentMixSchema = z
   );
 
 export const productSettingsSchema = z.object({
-  platforms: z
-    .array(z.enum(['FACEBOOK', 'INSTAGRAM']))
-    .min(1)
-    .default(['FACEBOOK', 'INSTAGRAM']),
+  platforms: z.array(platformEnum).min(1).default(['FACEBOOK', 'INSTAGRAM']),
   language: z.string().min(2).default('ro-formal'),
   postsPerWeek: z.number().int().min(1).max(14).default(5),
   contentMix: contentMixSchema.default({

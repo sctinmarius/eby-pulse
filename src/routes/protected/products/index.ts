@@ -8,6 +8,7 @@ import {
   writableProductSettingsPatchSchema,
   writableProductSettingsSchema,
 } from '../../../schema/product-settings.js';
+import { productIdParams } from '../../../schema/shared.js';
 import { getOwnedProduct } from '../../../services/products.js';
 import { bearerSecurity } from '../../../common/constant.js';
 
@@ -22,12 +23,29 @@ const productRoutes: FastifyPluginAsyncZod = async (app) => {
     '/products',
     {
       schema: {
+        tags: ['Products (Step 2)'],
+        summary: 'Create a product',
+        description:
+          'Registers a product under the authenticated business — one product per app/site the agent runs for. `slug` must be unique across all businesses. `settings` configures the posting strategy (platforms, language/formality, posts per week, content mix); omit it to use the defaults (Facebook + Instagram, `ro-formal`, 5/week, 40/30/20/10 mix).',
         security: bearerSecurity,
-        body: z.object({
-          name: z.string().min(2).max(150),
-          slug: slugSchema,
-          settings: writableProductSettingsSchema.optional(),
-        }),
+        body: z
+          .object({
+            name: z.string().min(2).max(150),
+            slug: slugSchema,
+            settings: writableProductSettingsSchema.optional(),
+          })
+          .meta({
+            example: {
+              name: 'Doctor Estimator',
+              slug: 'doctor-estimator',
+              settings: {
+                platforms: ['FACEBOOK', 'INSTAGRAM'],
+                language: 'ro-formal',
+                postsPerWeek: 5,
+                contentMix: { educational: 40, feature: 30, socialProof: 20, offer: 10 },
+              },
+            },
+          }),
       },
     },
     async (request, reply) => {
@@ -53,19 +71,33 @@ const productRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   );
 
-  app.get('/products', { schema: { security: bearerSecurity } }, async (request) =>
-    prisma.product.findMany({
-      where: { businessId: request.business.id },
-      orderBy: { createdAt: 'asc' },
-    }),
+  app.get(
+    '/products',
+    {
+      schema: {
+        tags: ['Products (Step 2)'],
+        summary: 'List products',
+        description: 'Lists every product owned by the authenticated business, oldest first.',
+        security: bearerSecurity,
+      },
+    },
+    async (request) =>
+      prisma.product.findMany({
+        where: { businessId: request.business.id },
+        orderBy: { createdAt: 'asc' },
+      }),
   );
 
   app.get(
     '/products/:productId',
     {
       schema: {
+        tags: ['Products (Step 2)'],
+        summary: 'Get a product',
+        description:
+          'Fetches one product by id. Returns 404 if it does not exist or is not owned by the authenticated business.',
         security: bearerSecurity,
-        params: z.object({ productId: z.string() }),
+        params: productIdParams,
       },
     },
     async (request) => getOwnedProduct(request.params.productId, request.business.id),
@@ -75,12 +107,18 @@ const productRoutes: FastifyPluginAsyncZod = async (app) => {
     '/products/:productId',
     {
       schema: {
+        tags: ['Products (Step 2)'],
+        summary: 'Update a product',
+        description:
+          'Updates the product name and/or settings. `settings` is a partial patch merged onto the existing settings — e.g. send only `{ "postsPerWeek": 3 }` to change cadence without touching the rest.',
         security: bearerSecurity,
-        params: z.object({ productId: z.string() }),
-        body: z.object({
-          name: z.string().min(2).max(150).optional(),
-          settings: writableProductSettingsPatchSchema.optional(),
-        }),
+        params: productIdParams,
+        body: z
+          .object({
+            name: z.string().min(2).max(150).optional(),
+            settings: writableProductSettingsPatchSchema.optional(),
+          })
+          .meta({ example: { settings: { postsPerWeek: 3 } } }),
       },
     },
     async (request) => {

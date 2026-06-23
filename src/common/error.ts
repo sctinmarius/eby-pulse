@@ -7,6 +7,14 @@ export class NotFoundError extends Error {
   statusCode = HttpStatusCodes.HTTP_STATUS_NOT_FOUND;
 }
 
+export class ConflictError extends Error {
+  statusCode = HttpStatusCodes.HTTP_STATUS_CONFLICT;
+}
+
+export class BudgetExceededError extends Error {
+  statusCode = HttpStatusCodes.HTTP_STATUS_PAYMENT_REQUIRED;
+}
+
 export const errorHandler = (error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
   if (hasZodFastifySchemaValidationErrors(error)) {
     return reply

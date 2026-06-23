@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Business {
-  id              String   @id @default(cuid())
-  name            String
-  defaultLanguage String   @default("en") @map("default_language")
-  timezone        String   @default("Europe/Bucharest")
-  telegramChatId  String?  @map("telegram_chat_id")
-  apiKeyHash      String   @unique @map("api_key_hash")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(cuid())
+  name               String
+  defaultLanguage    String   @default("en") @map("default_language")
+  timezone           String   @default("Europe/Bucharest")
+  telegramChatId     String?  @map("telegram_chat_id")
+  apiKeyHash         String   @unique @map("api_key_hash")
+  monthlySpendCapUsd Decimal? @map("monthly_spend_cap_usd") @db.Decimal(10, 2)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   products Product[]
 
